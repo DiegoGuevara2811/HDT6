@@ -1,0 +1,43 @@
+**Cálculo de Complejidad para la Operación #4: Ordenar todos los Pokémon por Tipo1**
+
+La operación #4 requiere **ordenar y mostrar todos los Pokémon leídos del archivo, ordenados por el campo Tipo1**. La complejidad depende de la implementación de `Map` que el usuario seleccione.
+
+### ** Complejidad de cada estructura de datos**
+
+#### **Caso 1: HashMap (Opción 1 en el programa)**
+
+- **Búsqueda de todos los valores en el mapa** → O(n) *(se obtienen los valores del HashMap)*.
+- **Conversión a una lista** → O(n) *(se copian los elementos a una lista para ordenarlos)*.
+- **Ordenamiento con ****`Collections.sort()`** → O(n log n).
+
+🔹 **Complejidad total con HashMap:** **O(n log n)**
+
+#### **Caso 2: TreeMap (Opción 2 en el programa)**
+
+- `TreeMap` mantiene los elementos **ordenados por clave**, pero en este caso, la clave es el **nombre del Pokémon**, no su Tipo1.
+- **Conversión a lista para reordenar por Tipo1** → O(n).
+- **Ordenamiento con ****`Collections.sort()`** → O(n log n).
+
+🔹 **Complejidad total con TreeMap:** **O(n log n)** *(igual a HashMap, pero con un pequeño overhead debido a la estructura del árbol)*.
+
+
+
+#### **Caso 3: LinkedHashMap (Opción 3 en el programa)**
+
+- `LinkedHashMap` mantiene el orden de inserción, pero no permite ordenar directamente por Tipo1.
+- **Conversión a lista** → O(n).
+- **Ordenamiento con ****`Collections.sort()`** → O(n log n).
+
+🔹 **Complejidad total con LinkedHashMap:** **O(n log n)** *(igual a los otros casos, ya que el ordenamiento es explícito).*
+
+
+### **2. Elección de la mejor estructura**
+
+Como **todas las implementaciones de ****`Map`**** requieren ordenar manualmente la lista**, la complejidad final es siempre **O(n log n)**. Sin embargo:
+
+- **`HashMap`**** es la opción más eficiente en cuanto a almacenamiento y acceso**, ya que su búsqueda es O(1).
+- \*\*`TreeMap` tiene sobrecarga en la inserción, pero podría ser útil si se necesitara ordenar constantemente por otra clave.
+- **`LinkedHashMap`**** solo ayuda si el orden de inserción es relevante, lo cual no es el caso aquí.**
+
+🔹 **Conclusión:** Para esta operación, cualquier `Map` tiene la misma complejidad O(n log n), pero `HashMap` es la opción más eficiente para almacenamiento y recuperación de datos.
+
