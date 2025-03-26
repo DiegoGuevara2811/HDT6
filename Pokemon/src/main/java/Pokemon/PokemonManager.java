@@ -13,41 +13,56 @@ public class PokemonManager {
     }
 
     // Cargar Pokémon desde resources usando getResourceAsStream
-    public void loadPokemonData(String filePath) {
+    public String loadPokemonData(String filePath) {
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath);
         if (inputStream == null) {
-            System.out.println("Error: No se pudo encontrar el archivo CSV en resources.");
-            return;
+            return "Error: No se pudo encontrar el archivo CSV en resources.";
         }
 
-        System.out.println("Archivo CSV encontrado, iniciando lectura...");
+        StringBuilder result = new StringBuilder();
+        result.append("Archivo CSV encontrado, iniciando lectura...\n");
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             String header = br.readLine(); // Saltar encabezado
-            System.out.println("Encabezado del CSV: " + header);
+            result.append("Encabezado del CSV: ").append(header).append("\n");
 
             while ((line = br.readLine()) != null) {
-                System.out.println("Leyendo línea: " + line); // Depuración
                 String[] data = line.split(",");
 
                 if (data.length < 9) {
-                    System.out.println("Línea inválida (menos de 9 columnas), saltando...");
+                    result.append("Línea inválida (menos de 9 columnas), saltando...\n");
                     continue;
                 }
 
                 String name = normalizeString(data[0]);
                 String type1 = normalizeString(data[2]);
                 String type2 = normalizeString(data[3]);
-                String abilities = normalizeString(data[7].split(",")[0]);
+                String abilities = normalizeString(data[7]); // Tomamos todas las habilidades
 
-                Pokemon p = new Pokemon(name, type1, type2, abilities);
+                // Aquí corregimos cómo se manejan las habilidades
+                String[] abilityList = abilities.split(",");  // Si hay más de una habilidad, las separa
+                StringBuilder abilityBuilder = new StringBuilder();
+
+                for (String ability : abilityList) {
+                    ability = ability.trim();  // Eliminar espacios adicionales
+                    if (!ability.isEmpty()) {  // Si no está vacío, agregar al StringBuilder
+                        abilityBuilder.append(ability).append(" ");  // Añadimos la habilidad
+                    }
+                }
+
+                // Eliminamos el espacio extra al final
+                String finalAbilities = abilityBuilder.toString().trim();
+
+                // Creamos el objeto Pokémon con las habilidades correctamente asignadas
+                Pokemon p = new Pokemon(name, type1, type2, finalAbilities);
                 pokemonMap.put(name.toLowerCase(), p);
             }
-            System.out.println("Pokémon cargados correctamente: " + pokemonMap.keySet());
+            result.append("Pokémon cargados correctamente: ").append(pokemonMap.keySet()).append("\n");
         } catch (IOException e) {
-            System.out.println("Error al leer el archivo CSV: " + e.getMessage());
+            result.append("Error al leer el archivo CSV: ").append(e.getMessage()).append("\n");
         }
+        return result.toString();
     }
 
     // Agregar Pokémon a la colección del usuario con manejo de mayúsculas y espacios
@@ -97,17 +112,27 @@ public class PokemonManager {
 
     // Obtener Pokémon por habilidad con manejo de mayúsculas y espacios
     public String getPokemonByAbility(String ability) {
-        ability = normalizeString(ability);
+        ability = normalizeString(ability).replace("\"", ""); // Eliminar comillas y normalizar
         StringBuilder sb = new StringBuilder();
+
         for (Pokemon p : pokemonMap.values()) {
-            if (p.ability.equalsIgnoreCase(ability)) {
-                sb.append(p).append("\n");
+            // Eliminamos las comillas de la habilidad de cada Pokémon
+            String[] abilities = p.getAbility().replace("\"", "").split(",");  // Dividimos las habilidades por coma
+
+            for (String pokemonAbility : abilities) {
+                pokemonAbility = normalizeString(pokemonAbility.trim());  // Normalizamos cada habilidad
+
+                if (pokemonAbility.equalsIgnoreCase(ability)) {
+                    sb.append(p).append("\n");
+                    break;  // Si encontramos una coincidencia, terminamos la búsqueda
+                }
             }
         }
+
         return sb.length() > 0 ? sb.toString() : "No se encontraron Pokémon con esta habilidad.";
     }
 
-    // Normalizar strings eliminando espacios adicionales y convirtiendo a minúsculas
+    // Método de normalización de texto para convertirlo a minúsculas
     private String normalizeString(String str) {
         return str == null ? "" : str.trim().toLowerCase();
     }
